@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مُفتِّش النص العربي — كشف علامات الذكاء الاصطناعي والحركات في ملفات Word</title>
+  <meta name="description" content="أداة مجانية تفحص ملفات Word (docx) العربية بحثاً عن العلامات الخفية (Zero-Width) وكل الحركات والتشكيل، وتعطي مؤشراً على احتمال توليد النص آلياً. تعمل بالكامل داخل متصفحك بدون رفع أي ملف لأي خادم." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%230f766e' d='M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z'/%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M8.5 12l2.5 2.5L15.5 9'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z"/><path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8.5 12l2.5 2.5L15.5 9"/></svg>
+        <div>
+          <strong>مُفتِّش النص العربي</strong>
+          <small>Arabic Text Integrity Inspector</small>
+        </div>
+      </div>
+      <span class="privacy-badge">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 1a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1V6a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v3h6V6a3 3 0 0 0-3-3z"/></svg>
+        يعمل محلياً 100% — لا يُرفع ملفك لأي خادم
+      </span>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ==================== الواجهة الرئيسية ==================== -->
+    <section class="hero">
+      <h1>افحص ملفات Word العربية بحثاً عن <span class="accent">آثار الذكاء الاصطناعي الخفية</span> والتشكيل</h1>
+      <p class="hero-sub">
+        تكشف الأداة العلامات غير المرئية (مسافات صفرية العرض، علامات الاتجاه، BOM) وكل الحركات العربية
+        (الفتحة، الضمة، الكسرة، التنوين، الشدة، السكون والعلامات القرآنية) داخل ملفات <b>.docx</b>،
+        ثم تعرض مؤشر سلامة وتقريراً تفصيلياً مع إمكانية تنزيل نسخة منقّاة.
+      </p>
+      <div class="hero-badges">
+        <span>فحص كامل داخل المتصفح</span>
+        <span>جميع العلامات الصفرية ZWSP / ZWNJ / ZWJ</span>
+        <span>كل الحركات والعلامات القرآنية</span>
+        <span>تقرير HTML + نسخة منقّاة</span>
+      </div>
+    </section>
+
+    <!-- ==================== منطقة الرفع ==================== -->
+    <section class="card upload-card" aria-label="رفع ملف الفحص">
+      <div id="dropzone" class="dropzone" tabindex="0" role="button"
+           aria-label="اسحب ملف docx هنا أو اضغط للاختيار">
+        <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-3 4.4L12 11.5l2 1.9v-1.3h2v3.8h-2V14.6l-2 1.9-2-1.9v1.3H8v-3.8h2v1.3z"/></svg>
+        <p class="dz-title">اسحب ملف Word (.docx) وأفلته هنا</p>
+        <p class="dz-or">أو</p>
+        <span class="btn btn-primary">اختيار ملف من جهازك</span>
+        <p class="dz-hint">يتم فك ضغط الملف وقراءته داخل متصفحك فقط — لا شيء يغادر جهازك</p>
+        <input type="file" id="fileInput" accept=".docx" hidden />
+      </div>
+
+      <div class="paste-toggle-row">
+        <button id="pasteToggle" type="button" class="linklike">أو الصق نصاً مباشرةً للفحص السريع</button>
+      </div>
+
+      <div id="pasteArea" class="paste-area" hidden>
+        <label for="pasteText" class="sr-only">الصق النص العربي هنا</label>
+        <textarea id="pasteText" rows="7" placeholder="الصق هنا نصاً عربياً لفحصه… (مفيد لفحص فقرات منسوخة من ملف أو من الويب)"></textarea>
+        <button id="scanPasteBtn" type="button" class="btn btn-primary">فحص النص الملصوق</button>
+      </div>
+
+      <div id="scanStatus" class="scan-status" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="statusText">جارٍ الفحص…</span>
+      </div>
+
+      <div id="errorBox" class="error-box" role="alert" hidden></div>
+      <div id="cdnWarn" class="error-box" role="alert" hidden>
+        <strong>تنبيه:</strong> تعذّر تحميل مكتبة JSZip من الشبكة — فحص ملفات docx يحتاج اتصالاً بالإنترنت عند أول فتح للصفحة. لا يزال بإمكانك استخدام وضع لصق النص.
+      </div>
+    </section>
+
+    <!-- ==================== النتائج ==================== -->
+    <section id="results" hidden aria-live="polite">
+
+      <!-- الحكم والمؤشر -->
+      <div class="verdict-grid">
+        <div class="card verdict-card">
+          <h2>مؤشر سلامة النص</h2>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 120 120" class="ring" aria-hidden="true">
+              <circle cx="60" cy="60" r="54" class="ring-bg" />
+              <circle cx="60" cy="60" r="54" id="scoreArc" class="ring-arc" transform="rotate(-90 60 60)" />
+            </svg>
+            <div class="score-center">
+              <span id="scoreNum">—</span>
+              <small>من 100</small>
+            </div>
+          </div>
+          <p id="bandText" class="band-text">—</p>
+          <p id="smallSampleNote" class="sample-note" hidden>عينة نص صغيرة — اعتبر النتيجة إرشادية فقط.</p>
+          <h3>عوامل الخصم من المؤشر</h3>
+          <ul id="dedList" class="ded-list"></ul>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi" id="kpiWords"><span class="kpi-val">—</span><span class="kpi-label">كلمة</span></div>
+          <div class="kpi" id="kpiLetters"><span class="kpi-val">—</span><span class="kpi-label">حرف عربي</span></div>
+          <div class="kpi" id="kpiInvisible"><span class="kpi-val">—</span><span class="kpi-label">علامة خفية</span></div>
+          <div class="kpi" id="kpiHarakat"><span class="kpi-val">—</span><span class="kpi-label">حركة (تشكيل)</span></div>
+          <div class="kpi" id="kpiDensity"><span class="kpi-val">—</span><span class="kpi-label">كثافة الحركات</span></div>
+          <div class="kpi" id="kpiFullVoc"><span class="kpi-val">—</span><span class="kpi-label">كلمات مُشكَّلة بالكامل</span></div>
+        </div>
+      </div>
+
+      <!-- العلامات الخفية -->
+      <div class="card">
+        <h2>العلامات الخفية غير المرئية <small class="sec-en">Invisible / Zero-Width marks</small></h2>
+        <p class="sec-desc">
+          هذه الرموز لا تظهر في الطباعة أو العرض لكنها موجودة داخل الملف، وهي البصمة الأشهر
+          لمعالجة النصوص آلياً أو نسخها من مصادر مولّدة. اضغط على أي رمز في المعاينة أدناه لمعرفة هويته.
+        </p>
+        <table id="invTable" class="data-table" hidden>
+          <thead>
+            <tr><th>الرمز</th><th>الاسم</th><th>الكود</th><th>التقييم</th><th>العدد</th></tr>
+          </thead>
+          <tbody id="invTableBody"></tbody>
+        </table>
+        <p id="invEmpty" class="empty-note">لم يُعثر على أي علامة خفية — النص نظيف من هذا النوع.</p>
+
+        <div id="ctxSection" hidden>
+          <h3>سياقات الظهور</h3>
+          <ol id="ctxList" class="ctx-list"></ol>
+        </div>
+      </div>
+
+      <!-- الحركات -->
+      <div class="card">
+        <h2>الحركات والتشكيل <small class="sec-en">Arabic diacritics (Harakat)</small></h2>
+        <p class="sec-desc">
+          النصوص المولّدة آلياً بالعربية تُشكَّل تشكيلاً كاملاً وشبه موحّد في الغالب، بينما يُشكِّل البشر
+          مواضع الالتباس فقط. لذلك تُظهر الأداة عدد كل حركة وكثافتها الإجمالية بدل الحكم بالوجود أو الانعدام.
+        </p>
+        <p id="harEmpty" class="empty-note">لا توجد أي حركات في المستند — نص غير مُشكَّل إطلاقاً (النمط البشري السائد).</p>
+        <div id="harGrid">
+          <div id="harChips" class="har-grid"></div>
+        </div>
+        <ul id="harExtList" class="ext-list"></ul>
+
+        <div id="harStats" class="har-stats" hidden>
+          <div class="density-panel">
+            <div class="density-num"><span id="densityVal">—</span><small>كثافة الحركات<br>(حركة لكل حرف)</small></div>
+            <p id="densityInterp" class="density-interp"></p>
+          </div>
+          <div id="paraHotWrap">
+            <h3>أكثر الفقرات تشكيلاً</h3>
+            <ol id="paraHot" class="hot-list"></ol>
+          </div>
+          <p class="note">
+            <b>ملاحظة مهمة:</b> وجود الحركات وحده لا يدين النص؛ فالمصاحف وكتب الشعر وكتب تعليم القراءة
+            والنصوص الدينية تُكتب مشكَّلة بشكل طبيعي. قارن الكثافة مع طبيعة مستندك، ورجّح كفة العلامات الخفية
+            فهي المؤشر الأقوى.
+          </p>
+        </div>
+      </div>
+
+      <!-- توزيع العلامات على أجزاء الملف -->
+      <div class="card" id="partSection">
+        <h2>أين وُجدت العلامات؟ <small class="sec-en">per document part</small></h2>
+        <p class="sec-desc">يفحص المحرك نص المستند الرئيسي والترويسات والتذييلات والحواشي والتعليقات.</p>
+        <table class="data-table">
+          <thead><tr><th>الجزء</th><th>عدد الأحرف</th><th>علامات خفية</th><th>حركات</th></tr></thead>
+          <tbody id="partTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- المعاينة المميزة -->
+      <div class="card">
+        <h2>المعاينة المميَّزة <small class="sec-en">highlighted preview</small></h2>
+        <p class="sec-desc">
+          تُستبدل كل علامة خفية بوسم أحمر يكشف موضعها، وتُميَّز كل حركة بلون أخضر.
+          <span class="mk mk-inv">ZWSP</span> علامة خفية &nbsp;·&nbsp; <span class="mk mk-har">َ</span> حركة
+        </p>
+        <div id="previewBox" class="preview-box" dir="auto"></div>
+        <p id="previewNote" class="note" hidden>تُعرض أول 200 فقرة فقط — النصوص الكاملة في التقرير القابل للتنزيل.</p>
+      </div>
+
+      <!-- إجراءات التنزيل -->
+      <div id="actionsRow" class="actions-row">
+        <div class="clean-option">
+          <label>
+            <input type="checkbox" id="cleanHarakatChk" />
+            إزالة الحركات أيضاً عند التنظيف (غير مستحسن للنصوص الدينية والشعر)
+          </label>
+        </div>
+        <div class="action-btns">
+          <button id="dlReport" type="button" class="btn btn-primary">تنزيل التقرير الكامل (HTML)</button>
+          <button id="dlClean" type="button" class="btn btn-outline">تنزيل نسخة Word منقّاة (docx)</button>
+          <button id="dlText" type="button" class="btn btn-outline">تنزيل نص منقّي (txt)</button>
+          <button id="scanAgain" type="button" class="btn btn-ghost">فحص ملف آخر</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== كيف تعمل الأداة ==================== -->
+    <section class="card how">
+      <h2>كيف تعمل الأداة؟</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <h3>ارفع ملف docx</h3>
+          <p>ملف Word هو أرشيف مضغوط (ZIP) يحوي ملفات XML. تفك الأداة الضغط داخل متصفحك عبر JSZip وتقرأ نص المستند الرئيسي وترويساته وتذييلاته وحواشيه وتعليقاته — دون إرسال أي شيء للخارج.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <h3>مسح حرفاً حرفاً</h3>
+          <p>يُمرَّر كل حرف على قاعدة بيانات شاملة: 23 علامة خفية/تحكمية (كل عائلة Zero-Width وعلامات الاتجاه والعزل وBOM وغيرها) وكل الحركات العربية من الفتحة إلى العلامات القرآنية الموسعة.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <h3>مؤشر + تقرير + تنظيف</h3>
+          <p>يُحسب مؤشر سلامة (100 = نظيف) مع بيان عوامل الخصم، وتعرض مواضع كل علامة بسياقها، ثم تستطيع تنزيل تقرير HTML أو نسخة Word منقّاة أُزيلت منها العلامات مع الحفاظ على التنسيق.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== العلامات المغطاة ==================== -->
+    <section class="card coverage">
+      <h2>العلامات المغطاة بالفحص</h2>
+      <details>
+        <summary>العلامات الخفية ورموز التحكم (23 رمزاً) — اضغط للعرض</summary>
+        <div id="coverageInv" class="coverage-body"></div>
+      </details>
+      <details>
+        <summary>الحركات الأساسية والموسّعة والعلامات القرآنية — اضغط للعرض</summary>
+        <div id="coverageHar" class="coverage-body"></div>
+      </details>
+    </section>
+
+    <!-- ==================== الاختبار الذاتي ==================== -->
+    <section class="card selftest">
+      <h2>الاختبار الذاتي <small class="sec-en">self-test</small></h2>
+      <p class="sec-desc">
+        يبني مستند Word تجريبياً داخل الذاكرة ويحوي علامات خفية وحركات، ثم يفحصه وينظّفه ويعيد فحصه —
+        للتحقق أن كل خطوط الأداة تعمل كما يجب في متصفحك.
+      </p>
+      <button id="selftestBtn" type="button" class="btn btn-outline">تشغيل الاختبار الذاتي</button>
+      <div id="selftestOut" class="selftest-out" hidden></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>
+        <b>إخلاء مسؤولية:</b> النتيجة استدلالية (Heuristic) وليست دليلاً قاطعاً؛ استخدمها كأداة مساعدة للمراجع البشري.
+        لا تُجمع أي بيانات ولا تُستخدم أي كوكيز — كل الفحص يجري في متصفحك.
+      </p>
+      <p class="footer-meta">مُفتِّش النص العربي · <span id="yearSpan"></span> · جاهز للنشر على GitHub Pages</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="chars.js"></script>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
